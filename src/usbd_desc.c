@@ -53,12 +53,12 @@
 #if defined(DAC_PCM5102A)
 //#define USBD_PRODUCT_HS_STRING        "PCM5102A DAC"
 //#define USBD_PRODUCT_FS_STRING        "PCM5102A DAC"
-#define USBD_PRODUCT_HS_STRING        "ATS5805M Speakers"
-#define USBD_PRODUCT_FS_STRING        "ATS5805M Speakers"
 //#define USBD_PRODUCT_HS_STRING        "PCM5102A LM1875T Speakers"
 //#define USBD_PRODUCT_FS_STRING        "PCM5102A LM1875T Speakers"
 //#define USBD_PRODUCT_HS_STRING        "PCM1789 TPA3116 Speakers"
 //#define USBD_PRODUCT_FS_STRING        "PCM1789 TPA3116 Speakers"
+#define USBD_PRODUCT_HS_STRING        "ATS5805M Speakers"
+#define USBD_PRODUCT_FS_STRING        "ATS5805M Speakers"
 #elif defined(DAC_UDA1334ATS)
 #define USBD_PRODUCT_HS_STRING        "UDA1334ATS DAC"
 #define USBD_PRODUCT_FS_STRING        "UDA1334ATS DAC"

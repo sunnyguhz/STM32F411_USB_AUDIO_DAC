@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]       # 如果你的默认分支是 master，请改为 master
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:           # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,17 +13,24 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4   # 这行会自动拉取 har-in-air/STM32F411_USB_AUDIO_DAC 的代码
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y wget xz-utils libxext6 libxrender1 libxtst6 libxi6 libfreetype6 libgl1-mesa-glx
 
-      - name: Download STM32CubeIDE installer
+      # 方式一：从 Release 下载（推荐）
+      - name: Download STM32CubeIDE installer from Release
         run: |
-          wget https://www.st.com/stm32cubeide --no-check-certificate -O st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
+          wget https://github.com/har-in-air/STM32F411_USB_AUDIO_DAC/releases/download/tools/st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
           chmod +x st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
+
+      # 方式二：如果安装包放在仓库根目录的 tools/ 文件夹下，取消下面注释并注释上面
+      # - name: Download STM32CubeIDE installer from repo
+      #   run: |
+      #     cp tools/st-stm32cubeide_1.18.1_amd64.deb_bundle.sh .
+      #     chmod +x st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
 
       - name: Extract and install STM32CubeIDE
         run: |

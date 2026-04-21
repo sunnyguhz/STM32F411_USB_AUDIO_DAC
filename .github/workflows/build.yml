@@ -1,0 +1,66 @@
+name: STM32CubeIDE CI
+
+on:
+  push:
+    branches: [ "main" ]       # 如果你的默认分支是 master，请改为 master
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:           # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4   # 这行会自动拉取 har-in-air/STM32F411_USB_AUDIO_DAC 的代码
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget xz-utils libxext6 libxrender1 libxtst6 libxi6 libfreetype6 libgl1-mesa-glx
+
+      - name: Download STM32CubeIDE installer
+        run: |
+          wget https://www.st.com/stm32cubeide --no-check-certificate -O st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
+          chmod +x st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
+
+      - name: Extract and install STM32CubeIDE
+        run: |
+          ./st-stm32cubeide_1.18.1_amd64.deb_bundle.sh --noexec --target /tmp/stm32cubeide
+          sudo dpkg -i /tmp/stm32cubeide/*.deb
+          rm -rf /tmp/stm32cubeide st-stm32cubeide_1.18.1_amd64.deb_bundle.sh
+
+      - name: Get project name from .project file
+        id: project
+        run: |
+          PROJECT_NAME=$(grep -m1 "<name>" .project | sed 's/.*<name>\(.*\)<\/name>.*/\1/')
+          echo "name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "Project name: $PROJECT_NAME"
+
+      - name: Create Eclipse workspace
+        run: mkdir -p /tmp/workspace
+
+      - name: Import project into workspace
+        run: |
+          /opt/st/stm32cubeide_1.18.1/stm32cubeide \
+            --launcher.suppressErrors \
+            -nosplash \
+            -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
+            -import "$GITHUB_WORKSPACE" \
+            -data "/tmp/workspace"
+
+      - name: Build the project
+        run: |
+          /opt/st/stm32cubeide_1.18.1/stm32cubeide \
+            --launcher.suppressErrors \
+            -nosplash \
+            -application org.eclipse.cdt.managedbuilder.core.headlessbuild \
+            -data "/tmp/workspace" \
+            -build "${{ steps.project.outputs.name }}/Debug"
+
+      - name: Upload firmware binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: ${{ github.workspace }}/Debug/*.bin
